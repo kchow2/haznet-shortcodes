@@ -52,3 +52,60 @@ function author_taxonomies_format_result($authorTerms){
     }
     return $res;
 }
+
+/** Author Tax List shortcode
+ * @param type $atts - array of parameters. $atts['tax'] specifies the taxonomy to search for. $atts['term'] specifies the term to search for
+ * @return string - A list of authors that have submitted articles containing that term, with the article count beside them.
+ */
+function author_tax_list_sc($atts){ 
+    if(!isset($atts['tax']) || !isset($atts['term'])){
+        return "Usage: [author-tax-list tax=<XX> term=<YY> ]";
+    }
+    
+    $taxSlug = $atts['tax'];
+    $termSlugs = array($atts['term']);
+    $posts = get_posts( array(
+        'posts_per_page' => -1,
+        'tax_query' => array(
+            array(
+                    'taxonomy' => $taxSlug,
+                    'field'    => 'slug',
+                    'terms'    => $termSlugs,
+            )
+        )
+    ));
+
+    $authorPostCount = array();
+    foreach ($posts as $p) {
+        $authorID = intval($p->post_author);
+        $authorPostCount[$authorID]++;
+    }
+    $authorNames = array();
+    
+    foreach(array_keys($authorPostCount) as $authorID){
+        $authorNames[$authorID] = get_the_author_meta('display_name', $authorID);
+    }
+            
+    return author_tax_list_format_result($authorPostCount, $authorNames);
+}
+add_shortcode('author-tax-list', 'author_tax_list_sc');
+
+function author_tax_list_format_result($authorPostCount, $authorNames){   
+    $res = "";
+    $res .= '<div class="auth-tax-list"><div class="row">';
+    foreach($authorPostCount as $authorID=>$count){
+        $res .= '<div class="col-sm-6 col-lg-3">';
+        $res .= '<div class="auth-name">' . $authorNames[$authorID] . '</div>';
+        $res .= '<div class="auth-term-count">' . ' (' . $count . ')' . '</div>';
+        $res .= '</div>';
+    }
+    $res .= '</div></div>';
+    return $res;
+}
+
+function hz_copyright_sc($atts){
+    $copyYear = 2017; 
+    $curYear = date('Y'); 
+    return '&copy; HazNet (' . $copyYear . (($copyYear != $curYear) ? '-' . $curYear : '').')';
+}
+add_shortcode('hz-copyright', 'hz_copyright_sc');
