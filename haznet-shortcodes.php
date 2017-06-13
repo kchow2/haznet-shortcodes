@@ -100,9 +100,12 @@ function author_tax_list_format_result($authorPostCount, $authorNames){
     $res = "";
     $res .= '<div class="auth-tax-list"><div class="row">';
     foreach($authorPostCount as $authorID=>$count){
-        $res .= '<div class="col-sm-6 col-lg-3">';
+        $authorUrl = '/author/'.get_the_author_meta('user_nicename', $authorID);
+        $res .= '<div class="col-sm-6 col-lg-4">';
+        $res .= '<a href="'.$authorUrl.'">';
         $res .= '<div class="auth-name">' . $authorNames[$authorID] . '</div>';
         $res .= '<div class="auth-term-count">' . ' (' . $count . ')' . '</div>';
+        $res .= "</a>";
         $res .= '</div>';
     }
     $res .= '</div></div>';
