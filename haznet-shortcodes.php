@@ -65,6 +65,7 @@ function author_tax_list_sc($atts){
     $taxSlug = $atts['tax'];
     $termSlugs = array($atts['term']);
     $posts = get_posts( array(
+        'post_type'=>array('post', 'resilience-post'),
         'posts_per_page' => -1,
         'tax_query' => array(
             array(
@@ -77,11 +78,16 @@ function author_tax_list_sc($atts){
 
     $authorPostCount = array();
     foreach ($posts as $p) {
-        $authorID = intval($p->post_author);
-        $authorPostCount[$authorID]++;
+        $userRoles = get_userdata($p->post_author)->roles;
+        //var_dump($p->post_title);
+        //var_dump($userRoles);
+        if(in_array("author", $userRoles)){
+            $authorID = intval($p->post_author);
+            $authorPostCount[$authorID]++;
+        }
     }
-    $authorNames = array();
     
+    $authorNames = array();
     foreach(array_keys($authorPostCount) as $authorID){
         $authorNames[$authorID] = get_the_author_meta('display_name', $authorID);
     }
